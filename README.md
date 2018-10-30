@@ -42,7 +42,7 @@ The workshop exercises will require you to have three pieces of software install
  - the `lme4` R package
  - the `rstanarm` R package
 
-You can check your R version by typing `sessionInfo()` at your R console, the version will be listed in the first line. If you need to install or update R, you can download the latest version (3.5.1) from these links: [macOS](https://cloud.r-project.org/bin/macosx/R-3.5.1.pkg) [windows](https://cloud.r-project.org/bin/windows/base/R-3.5.1-win.exe). If you use linux and have trouble installing R, please let us know.
+You can check your R version by typing `sessionInfo()` at your R console, the version will be listed in the first line. If you need to install or update R, you can download the latest version (3.5.1) from these links: [[download for mac](https://cloud.r-project.org/bin/macosx/R-3.5.1.pkg)] [[download for windows](https://cloud.r-project.org/bin/windows/base/R-3.5.1-win.exe)]. If you use linux and have trouble installing R, please let us know.
 
 Once you have R installed, you can install the other packages from the CRAN repositories with the following R command:
 
