@@ -311,24 +311,67 @@ again, the full model seems better, even though it has more parameters
 
 ---
 
-## information criteria
+## external validation
 
-There are other information criteria, e.g. the 'Bayesian' Information Criterion
-$$
-BIC = -2 \times ln(\hat{L}) + ln(n) \times k
-$$
+Both likelihood ratios and information criteria are *approximations* of how much the model is overfitting to the data, based on some *assumptions*.
 
-People like to argue about which of these are best.
+A more robust alternative is to calculate the likelihood against some data that weren't used to fit the model:
+
+ 1. train a model on dataset 1 and get the parameter estimates, e.g. $\hat{a}$ and $\hat{b}$
+ 2. make predictions of the *expected* value of the response for each datapoint in dataset 2 using the model equation, e.g.:
+$$
+\mu_j = \hat{a} + \hat{b} \times x_j
+$$
+$$
+\lambda_j = e^{\mu_j}
+$$
+ 3. compute the likelihood for each datapoint in dataset 2 given the expected values from the model fitted to dataset 1.
+
+But if you don't have an obvious second set of data to do this external validation, you can chop your data up into smaller datasets...
+
 
 ---
 
-## cross-validation
+## K-fold cross-validation
 
-Both likelihood ratios and information criteria are approximations of how much the model is overfitting to the data, based on some assumptions.
+ 1. divide the data into $K$ different 'folds'
+ 2. re-fit the model $K$ different times, each omitting one of the folds and combining the remaining $K-1$ folds into a single training dataset
+ 3. for each model, calculate the likelihood for each witheld datapoint given the *expected* value of $y_i$ from the model that excluded it.
+ 
+![](https://upload.wikimedia.org/wikipedia/commons/1/1c/K-fold_cross_validation_EN.jpg)
 
-An alternative is to calculate the likelihood on some data that weren't used to fit the model.
+[image from Wikipedia]
 
-This takes longer (you need to fit the model lots of times) and won't work well if you have very little data.
+---
+
+## K-fold cross-validation
+But...
+
+This takes longer than the alternative approaches (you need to re-fit the model lots of times)
+
+It might not work well if you have very little data, since each of the datasets you are fitting with will be smaller than the whole one.
+
+You might also need to think hard about how you split your data into folds. Maybe it's a better test to split by species, geographic area or year than splitting randomly?
+
+
+---
+
+## leave-one-out cross validation
+
+AKA LOOCV. This is the same as K-fold cross-validation, but where $K = n$, so each datapoint is its own fold.
+
+```{r echo = TRUE}
+df <- data.frame(y = y, x = x)
+cost <- function (y, yhat) {
+  -2 * dpois(y, yhat, log = TRUE)
+}
+```
+```{r echo = TRUE}
+boot::cv.glm(df, m_full, cost = cost)$delta[1]
+boot::cv.glm(df, m_int, cost = cost)$delta[1]
+```
+It looks like the full model did much worse than the intercept-only model. But that's not surprising as each one was fitted using only two datapoints!
+
 
 
 
