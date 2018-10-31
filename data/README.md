@@ -1,8 +1,8 @@
 # Data sets for use in linear models workshop
 
-The data used in this workshop are compiled from real data sets collected by Erica Fleishman and colleagues in the Great Basin region of the United States. Use of these compiled data sets beyond this workshop is not recommended.
+The data used in this workshop are a mixture of simulated data and real data collected by Erica Fleishman and colleagues in the Great Basin region of the United States. Use of these compiled data sets beyond this workshop is not recommended.
 
-If you are interested in using these data sets, all raw data are available at:
+If you are interested in using the raw Great Basin data, all raw data are available at:
 
 https://www.fs.usda.gov/rds/archive/Product/RDS-2015-0031 (birds)
 
