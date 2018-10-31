@@ -152,6 +152,16 @@ The *general* trick:
 
 see `?family` in R for some options
 
+> `binomial(link = "logit")`
+
+> `gaussian(link = "identity")`
+
+> `Gamma(link = "inverse")`
+
+> `inverse.gaussian(link = "1/mu^2")`
+
+> `poisson(link = "log")`
+
 ---
 
 ## Hurrah!
