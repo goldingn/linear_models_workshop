@@ -1,4 +1,4 @@
-setwd("~/Dropbox/research/linear_models_workshop/slides/")
+setwd("~/Dropbox/research/linear_models_workshop/slides/linear-models/")
 
 library(rmarkdown)
 library(revealjs)

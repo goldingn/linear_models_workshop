@@ -31,6 +31,9 @@ elevation <- predictors$elevation_m
 
 # discrete predictors: canyon or mountain range
 mountain_range <- predictors$mountain_range
+
+# create sub-matrix of correlated predictors
+x_corr <- predictors[, c(7, 14:16)]
 ```
 
 ### Workshop overview
@@ -255,11 +258,8 @@ boxplot(precipitation ~ mountain_range, pch = 16, las = 1, cex = 0.9,
 ### ANOVA
 
 ```{r, plot-discrete-residuals-setup, echo = FALSE, eval = TRUE}
-plot(precipitation ~ as.integer(as.factor(mountain_range)), pch = 16, las = 1, bty = "l", cex = 0.9, xlim = c(0.5, 4.5),
-     xaxt = "n",
-     col = alpha(col_palette[20], 0.5),
-     xlab = "Mountain range", ylab = "Precipitation (mm)")
-axis(1, at = 1:4, labels = levels(as.factor(mountain_range)))
+boxplot(precipitation ~ mountain_range, pch = 16, las = 1, cex = 0.9,
+        xlab = "Mountain range", ylab = "Precipitation (mm)")
 ```
 
 ----
@@ -276,7 +276,11 @@ mean_val <- tapply(precipitation, as.integer(as.factor(mountain_range)), mean)
 for (i in seq_len(4))
   lines(c(i - 0.2, i + 0.2), rep(mean_val[i], 2), lwd = 3, col = col_palette[200])
 ```
-<div class="fragment">
+
+----
+
+### ANOVA
+
 ```{r, plot-discrete-residuals2, echo = FALSE, eval = TRUE}
 plot(precipitation ~ as.integer(as.factor(mountain_range)), pch = 16, las = 1, bty = "l", cex = 0.9, xlim = c(0.5, 4.5),
      xaxt = "n",
@@ -289,7 +293,6 @@ for (i in seq_len(4))
 arrows(0.9, mean_val[1], 0.9, max(precipitation[mountain_range == "Monitor"]), lwd = 2, col = col_palette[150], length = 0.1)
 lines(c(0.8, 1), rep(max(precipitation[mountain_range == "Monitor"]), 2), lwd = 3, col = col_palette[150])
 ```
-</div>
 
 ----
 
@@ -404,13 +407,14 @@ mod
 
 ### General linear models
 
->- linear regression, ANOVA, t-tests: they're all the same
->- $y_i = \alpha + \mathbf{\beta}^{\mathrm{T}} \ \mathbf{x_i} + \epsilon_i$
->- just needs a special coding of $\mathbf{x_i}$ with discrete predictors
+>- linear regression, ANOVA, t-test: they're all the same
+>- just needs a special setup for discrete predictors
 
 ----
 
 ### Matrix notation
+
+>- $y_i = \alpha + \mathbf{\beta}^{\mathrm{T}} \ \mathbf{x_i} + \epsilon_i$
 
 <div class="fragment">
 $$\mathbf{\beta} = \pmatrix{\beta_{1} \\ \vdots \\ \beta_{k}} ; \ \mathbf{x_i} = \pmatrix{x_{i, 1} \\ \vdots \\ x_{i, k}}$$
@@ -422,7 +426,7 @@ $$\ \beta^{\mathrm{T}} = \pmatrix{\beta_1 & \dots & \beta_k}$$
 
 ----
 
-### How does this work?
+### ANOVA: how does this work?
 
 >- code the $x_{i,k}$ values as 1 or 0
 
@@ -455,9 +459,9 @@ a
 
 ----
 
-### What if we have more than one predictor?
+### More than one predictor
 
->- it's the same, but now the $\mathbf{x_i}$ values don't have to be 0 or 1
+>- same setup, but now the $\mathbf{x_i}$ values don't have to be 0 or 1
 
 <div class="fragment">
 $$ \mathbf{\beta}^{\mathrm{T}} = \pmatrix{\beta_1 & \beta_2 & \beta_3}$$
@@ -490,10 +494,19 @@ a
 >- the scale of the variables matters
 >- good to standardise continuous predictors
 
-<div type="fragment">
+<div class="fragment">
 ```{r, echo = TRUE, eval = FALSE}
 # standardise continuous predictors
 predictors_std <- scale(predictors)
+```
+</div>
+<div class="fragment">
+```{r, echo = FALSE, eval = TRUE}
+# standardise continuous predictors
+a <- model.matrix( ~ ., data = x_corr[, 1:3])[c(1, 500, 1000, 2000, 3000), ]
+rownames(a) <- NULL
+colnames(a)[2:4] <- paste0("predictor", seq_len(3))
+head(scale(a[, 2:4]))
 ```
 </div>
 
@@ -524,9 +537,7 @@ a
 >- plus: predictors are assumed to be independent(ish)
 >        + technical term: *multicollinearity*
 >- if two predictors are highly correlated the model can't tell them apart
->- how to address issues:
->        + careful predictor choice
->        + remove correlated predictors
+>- how to address issues: careful predictor choice, remove correlated predictors
 
 ----
 
