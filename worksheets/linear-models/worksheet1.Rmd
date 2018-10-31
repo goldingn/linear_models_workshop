@@ -1,0 +1,87 @@
+---
+title: "Linear models workshop: Part 1"
+author: "Jian Yen"
+date: "2 November 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Building a linear model
+
+Load the data set `predictor_variables.csv` into your R session. In this worksheet, we will work entirely with variables in this data set.
+
+I want to anser the following question: is variation in the biomass of leaf litter ("leaf_litter_biomass") explained by any of the supplied predictor variables? Your task is to develop a model (or models) to answer this question. It might help to work through the following questions:
+
+- do I want to use all the predictor?
+- are my predictors continuous or discrete?
+- which type of model is most appropriate?
+- do my data meet the model assumptions?
+       + do I need to transform my data?
+       + do I need to remove any predictors?
+       + do I need to standardise any predictors?
+- is my fitted model any good? Are there better options?
+- what information should I present from the fitted model?
+
+When deciding on a  model structure, it can help to keep your question in mind: which model makes the most sense given the biological or ecological context?
+
+As a reminder, here are some of the model structures we've covered:
+```{r model-structures}
+# linear regression
+mod_lm <- lm(continuous_response ~ continuous_predictor, data = data_set)
+
+# ANOVA
+mod_aov <- lm(continuous_response ~ discrete_predictor, data = data_set)
+
+# multiple linear regression: all continuous
+mod_mlm1 <- lm(continuous_response ~ continuous_predictor1 + continuous_predictor2, data = data_set)
+
+# multiple linear regression: mixed variables
+mod_mlm2 <- lm(continuous_response ~ continuous_predictor + discrete_predictor, data = data_set)
+
+# multiple linear regression: interactions
+mod_int <- lm(continuous_response ~ continuous_predictor1 * continuous_predictor2, data = data_set)
+
+# shorthand: include every variable in a data set
+#   (this will ignore the response varaible if it's in data_set)
+mod_full <- lm(continuous_response ~ ., data = data_set)
+
+# you can add interactions between all pairs of variables in the same way
+#   (but do you really want to do this?)
+mod_full_int <- lm(continuous_response ~ . * ., data = data_set)
+```
+
+Once you've fitted your model, the following summary functions can be helpful.
+```{r summarise-model}
+# generate diagnostic plots
+#    (makes four plots; use par(mfrow = c(2, 2)) to put these on one page)
+plot(mod)
+
+# if you just want one plot, you can use `which` to set the particular plot
+#    (type ?plot.lm for details on the different plot options)
+plot(mod, which = 1)
+
+# extract model coefficients and fit statistics
+summary(mod)
+```
+
+#### Questions
+- Are you happy with this model? Why or why not?
+- What is your main conclusion from this model?
+
+### Task
+Prepare a written description of this model (*methods*) and a written summary of the model outputs (*results*) (3-5 sentences). Think about the following: What information do you need to provide to make this model reproducible? Do your data meet the assumptions of your model? Does the model fit the data well? What information do you need to provide on each parameter? Which figures and/or tables would you use to support these sentences? (you don't have to create these figures unless you really want to).
+
+### Optional task: model selection
+Often it's difficult to decide on one best model. There are many different rules-of-thumb to guide your choice of a single, best model. Keep in mind that most of these are intended as suggestions and are only approximations to the truth. The true "best" model will depend on a range on factors, including the purpose of the model (e.g. explanation vs prediction).
+
+Here are some methods commonly used to choose a single, best model:
+- Fit all possible model combinations and choose the model with the highest r2 or most exciting p-values
+- Fit all possible model combinations and compare them with an information criterion, such as AIC
+- Fit all possible model combinations and compare them with a predictive test, such as cross validation or predictive performance against a holdout data set
+- Fit all (or many) possible model combinations and use a weighted average of all fitted models, with weights determined by model fit ("model averaging")
+- Define a model based on your knowledge of the study system, including variables deemed to be relevant
+
+Your task: list the pros and cons of these different approaches. Have you seen or thought of any other ways to choose a best model? Should we even aim to choose a single, best model?

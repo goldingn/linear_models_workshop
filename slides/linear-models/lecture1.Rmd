@@ -1,0 +1,578 @@
+---
+title: "E&E stats workshop: general linear models"
+date: "2 November 2018"
+---
+
+```{r setup, echo = FALSE, eval = TRUE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center")
+
+# set working directory
+setwd("~/Dropbox/research/linear_models_workshop/")
+
+# load R packages
+library(viridisLite)
+library(ggplot2)
+
+# we want all the simulated bits to be the same each time
+set.seed(2018-11-02)
+
+# set colour palette
+col_palette <- inferno(256)
+
+# load data
+response <- read.csv("data/bird_community.csv", stringsAsFactors = FALSE)[, -1]
+predictors <- read.csv("data/predictor_variables.csv", row.names = 1, stringsAsFactors = FALSE)
+
+# continuous response data: precipitation, min_temp, max_temp
+precipitation <- predictors$precipitation
+
+# continuous predictors: elevation_m
+elevation <- predictors$elevation_m
+
+# discrete predictors: canyon or mountain range
+mountain_range <- predictors$mountain_range
+```
+
+### Workshop overview
+
+>- https://github.com/goldingn/linear_models_workshop
+>- general linear models
+>- mixed effects models
+>- generalised linear models
+>- Bayesian inference
+
+----
+
+### Expected outcomes
+
+>- learn some new terms
+>- identify appropriate models for your data
+>- understand assumptions of common models
+>- know where to look for help
+
+----
+
+### An example
+
+```{r, plot-example, echo = FALSE, eval = TRUE}
+plot(precipitation ~ elevation, pch = 16, las = 1, bty = "l", cex = 0.9,
+     col = alpha(col_palette[25], 0.8),
+     xlab = "Elevation (m)", ylab = "Precipitation (mm)")
+```
+
+----
+
+### An example
+
+```{r, plot-example-abline, echo = FALSE, eval = TRUE}
+plot(precipitation ~ elevation, pch = 16, las = 1, bty = "l", cex = 0.9,
+     col = alpha(col_palette[25], 0.8),
+     xlab = "Elevation (m)", ylab = "Precipitation (mm)")
+abline(lm(precipitation ~ elevation), col = col_palette[200], lwd = 3)
+```
+
+----
+
+### Linear regression
+
+>- what characterises this example?
+>       + continuous response
+>       + continuous predictor
+
+----
+
+### Linear regression
+
+>- need an equation for a line:
+>        + $response = intercept + slope \times predictor + residual$
+>        + $y_i = \alpha + \beta \ x_i + \epsilon_i$
+>- our goal is to estimate the best values of $\alpha$ and $\beta$
+
+----
+
+### Linear regression
+
+```{r, residual-example, echo = FALSE, eval = TRUE}
+y_sub <- precipitation[seq(1, 3000, by = 10)]
+x_sub <- elevation[seq(1, 3000, by = 10)]
+plot(y_sub ~ x_sub, pch = 16, las = 1, bty = "l", cex = 0.9,
+     col = alpha(col_palette[25], 0.8),
+     xlab = "Elevation (m)", ylab = "Precipitation (mm)")
+resid_plot <- 221
+pred_vals <- predict(lm(y_sub ~ x_sub), newdata = list(x_sub = x_sub[resid_plot]))
+abline(lm(y_sub ~ x_sub), col = col_palette[200], lwd = 3)
+for (i in seq_along(resid_plot))
+  lines(rep(x_sub[resid_plot[i]], 2), c(pred_vals[i], y_sub[resid_plot[i]]), lwd = 4, col = col_palette[150])
+```
+
+----
+
+### Linear regression
+
+```{r, residual-example-all, echo = FALSE, eval = TRUE}
+y_sub <- precipitation[seq(1, 3000, by = 10)]
+x_sub <- elevation[seq(1, 3000, by = 10)]
+plot(y_sub ~ x_sub, pch = 16, las = 1, bty = "l", cex = 0.9,
+     col = alpha(col_palette[25], 0.8),
+     xlab = "Elevation (m)", ylab = "Precipitation (mm)")
+resid_plot <- seq(1, 300, by = 20)
+pred_vals <- predict(lm(y_sub ~ x_sub), newdata = list(x_sub = x_sub[resid_plot]))
+abline(lm(y_sub ~ x_sub), col = col_palette[200], lwd = 3)
+for (i in seq_along(resid_plot))
+  lines(rep(x_sub[resid_plot[i]], 2), c(pred_vals[i], y_sub[resid_plot[i]]), lwd = 4, col = col_palette[150])
+```
+
+----
+
+### Linear regression: assumptions
+
+>- observations are independent
+>- residuals are normally distributed
+>- residual variance is constant
+
+----
+
+### Linear regression: independent observations
+
+>- each independent observations gives a certain amount of information
+>- non-independent observations give less information
+>- how to avoid issues: good study design
+>- how to address issues: mixed models (second session)
+
+----
+
+### Linear regression: residual distribution
+
+>- $y_i = \alpha + \beta \ x_i + \epsilon_i$
+>- we assume $\epsilon_i$ is normally distributed
+>        + needed to define *likelihood*
+>- how to identify issues: diagnostic checks
+>- how to address issues: transformations, generalised linear models
+
+----
+
+### Linear regression: constant residual variance
+
+>- $y_i = \alpha + \beta \ x_i + \epsilon_i$
+>- we assume $\epsilon_i$ all come from one distribution
+>- how to identify issues: diagnostic checks
+>- how to address issues: transformations, GLMs, hierarchical models
+
+----
+
+### Linear regression: fitting a model in R
+
+```{r, lm-example-demo, echo = TRUE, eval = FALSE}
+# fit model
+mod <- lm(precipitation ~ elevation)
+
+# check model assumptions
+plot(mod)
+
+# summarise model
+summary(mod)
+```
+
+----
+
+### Linear regression: assessing a fitted model
+
+```{r, lm-example-true, echo = FALSE, eval = TRUE}
+par(mfrow = c(2, 2))
+mod <- lm(precipitation ~ elevation)
+plot(mod)
+par(mfrow = c(1, 1))
+```
+
+----
+
+### Linear regression: assessing a fitted model
+
+```{r, lm-example-log-print, echo = TRUE, eval = FALSE}
+# fit model with log-transformed response
+mod <- lm(log(precipitation) ~ elevation)
+
+# is it any better?
+plot(mod)
+```
+
+----
+
+### Linear regression: assessing a fitted model
+
+```{r, lm-example-log, echo = FALSE, eval = TRUE}
+par(mfrow = c(2, 2))
+mod <- lm(log(precipitation) ~ elevation)
+plot(mod)
+par(mfrow = c(1, 1))
+```
+
+----
+
+### Linear regression: interpreting a fitted model
+
+```{r, lm-example-summary, echo = TRUE, eval = FALSE}
+summary(mod)
+```
+
+```{r, lm-example-summary-real, echo = FALSE, eval = TRUE}
+mod <- lm(precipitation ~ elevation)
+summary(mod)
+```
+
+----
+
+### Linear regression: interpreting a fitted model
+
+>- how well does the model fit?
+>        + typically use $r^2$
+>- is there statistical support for an association?
+>        + often use *p-values*
+>- is a statistically supported association meaningful?
+>        + look at the coefficients
+
+----
+
+### Linear regression: presenting a fitted model
+
+>- is the model adequate? (assumptions, diagnostics)
+>- does the model fit the data? (diagnostics, $r^2$)
+>- is the model statistically meaningful? (p-values, test statistics)
+>- is the model actually meaningful? (parameter estimates)
+>- can I see it? (scatterplots)
+
+----
+
+### Another example
+
+```{r, plot-discrete-example, echo = FALSE, eval = TRUE}
+boxplot(precipitation ~ mountain_range, pch = 16, las = 1, cex = 0.9,
+        xlab = "Mountain range", ylab = "Precipitation (mm)")
+```
+
+----
+
+### ANOVA
+
+```{r, plot-discrete-residuals-setup, echo = FALSE, eval = TRUE}
+plot(precipitation ~ as.integer(as.factor(mountain_range)), pch = 16, las = 1, bty = "l", cex = 0.9, xlim = c(0.5, 4.5),
+     xaxt = "n",
+     col = alpha(col_palette[20], 0.5),
+     xlab = "Mountain range", ylab = "Precipitation (mm)")
+axis(1, at = 1:4, labels = levels(as.factor(mountain_range)))
+```
+
+----
+
+### ANOVA
+
+```{r, plot-discrete-residuals1, echo = FALSE, eval = TRUE}
+plot(precipitation ~ as.integer(as.factor(mountain_range)), pch = 16, las = 1, bty = "l", cex = 0.9, xlim = c(0.5, 4.5),
+     xaxt = "n",
+     col = alpha(col_palette[20], 0.5),
+     xlab = "Mountain range", ylab = "Precipitation (mm)")
+axis(1, at = 1:4, labels = levels(as.factor(mountain_range)))
+mean_val <- tapply(precipitation, as.integer(as.factor(mountain_range)), mean)
+for (i in seq_len(4))
+  lines(c(i - 0.2, i + 0.2), rep(mean_val[i], 2), lwd = 3, col = col_palette[200])
+```
+<div class="fragment">
+```{r, plot-discrete-residuals2, echo = FALSE, eval = TRUE}
+plot(precipitation ~ as.integer(as.factor(mountain_range)), pch = 16, las = 1, bty = "l", cex = 0.9, xlim = c(0.5, 4.5),
+     xaxt = "n",
+     col = alpha(col_palette[20], 0.5),
+     xlab = "Mountain range", ylab = "Precipitation (mm)")
+axis(1, at = 1:4, labels = levels(as.factor(mountain_range)))
+mean_val <- tapply(precipitation, as.integer(as.factor(mountain_range)), mean)
+for (i in seq_len(4))
+  lines(c(i - 0.2, i + 0.2), rep(mean_val[i], 2), lwd = 3, col = col_palette[200])
+arrows(0.9, mean_val[1], 0.9, max(precipitation[mountain_range == "Monitor"]), lwd = 2, col = col_palette[150], length = 0.1)
+lines(c(0.8, 1), rep(max(precipitation[mountain_range == "Monitor"]), 2), lwd = 3, col = col_palette[150])
+```
+</div>
+
+----
+
+### ANOVA
+
+>- what characterises this example?
+>       + continuous response
+>       + *discrete* predictor
+>- assumptions: identical to linear regression
+>- $response = overall \ intercept + group \ intercept + residual$
+>- $y_i = \alpha + \beta_{g(i)} + \epsilon_i$
+
+----
+
+### ANOVA: fitting a model in R
+
+```{r, anova-example, eval = FALSE, echo = TRUE}
+# fit a model
+mod <- lm(response ~ predictor, data = data_set)
+
+# does the model meet assumptions?
+plot(mod)
+
+# summarise the model
+summary(mod)
+```
+
+----
+
+### ANOVA: assessing a fitted model
+
+```{r, anova-example-real, eval = TRUE, echo = FALSE}
+par(mfrow = c(2, 2))
+mod <- lm(precipitation ~ mountain_range)
+plot(mod)
+par(mfrow = c(1, 1))
+```
+
+----
+
+### ANOVA: fitting a model in R
+
+```{r, anova-example-log, eval = FALSE, echo = TRUE}
+# fit a model to log-transformed data
+mod <- lm(log(response) ~ predictor, data = data_set)
+
+# does the model meet assumptions?
+plot(mod)
+
+# summarise the model
+summary(mod)
+```
+
+----
+
+### ANOVA: assessing a fitted model
+
+```{r, anova-example-log-real, eval = TRUE, echo = FALSE}
+par(mfrow = c(2, 2))
+mod <- lm(log(precipitation) ~ mountain_range)
+plot(mod)
+par(mfrow = c(1, 1))
+```
+
+----
+
+### ANOVA: interpreting a fitted model
+
+```{r, anova-example-interp-real, eval = TRUE, echo = FALSE}
+mod <- lm(log(precipitation) ~ mountain_range)
+summary(mod)
+```
+
+----
+
+### ANOVA: interpreting a fitted model
+
+>- now we have lots of p-values. . .
+>- can use *post hoc* tests but not universally accepted
+>- can pre-specify *contrasts* for specific hypotheses
+
+----
+
+### ANOVA: presenting a fitted model
+
+>- is the model adequate? (assumptions, diagnostics)
+>- does the model fit the data? (diagnostics, $r^2$)
+>- is the model statistically meaningful? (p-values, test statistics)
+>- is the model actually meaningful? (parameter estimates)
+>- can I see it? (boxplots)
+
+----
+
+### Aside: discrete predictor with two levels
+
+>- special case: t-test (it's still an ANOVA)
+
+<div class="fragment">
+```{r, t-test-example, eval = FALSE, echo = TRUE}
+mod <- t.test(response ~ predictor, data = data_set)
+summary(mod)
+```
+
+```{r, t-test-example-real, eval = TRUE, echo = FALSE}
+region <- ifelse(mountain_range %in% c("Monitor", "Toquima"), "East", "West")
+mod <- t.test(precipitation ~ region)
+mod
+```
+</div>
+
+----
+
+### General linear models
+
+>- linear regression, ANOVA, t-tests: they're all the same
+>- $y_i = \alpha + \mathbf{\beta}^{\mathrm{T}} \ \mathbf{x_i} + \epsilon_i$
+>- just needs a special coding of $\mathbf{x_i}$ with discrete predictors
+
+----
+
+### Matrix notation
+
+<div class="fragment">
+$$\mathbf{\beta} = \pmatrix{\beta_{1} \\ \vdots \\ \beta_{k}} ; \ \mathbf{x_i} = \pmatrix{x_{i, 1} \\ \vdots \\ x_{i, k}}$$
+</div>
+
+<div class="fragment">
+$$\ \beta^{\mathrm{T}} = \pmatrix{\beta_1 & \dots & \beta_k}$$
+</div>
+
+----
+
+### How does this work?
+
+>- code the $x_{i,k}$ values as 1 or 0
+
+<div class="fragment">
+$$ \mathbf{\beta}^{\mathrm{T}} = \pmatrix{\beta_1 & \beta_2 & \beta_3}$$
+</div>
+<div class="fragment">
+$$ \mathbf{x_i} = \pmatrix{0 \\ 1 \\ 0}$$
+</div>
+<div class="fragment">
+$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = \pmatrix{0 & \beta_2 & 0}$$
+</div>
+
+---
+
+### All too much?
+
+>- R will do this for you! (this is one reason R has `factors`)
+
+<div class="fragment">
+```{r, factor-example-demo, echo = TRUE, eval = FALSE}
+model.matrix( ~ discrete_predictor)
+```
+```{r, factor-example, echo = FALSE, eval = TRUE}
+a <- model.matrix( ~ mountain_range)[c(1, 500, 1000, 2000, 3000), ]
+rownames(a) <- NULL
+a
+```
+</div>
+
+----
+
+### What if we have more than one predictor?
+
+>- it's the same, but now the $\mathbf{x_i}$ values don't have to be 0 or 1
+
+<div class="fragment">
+$$ \mathbf{\beta}^{\mathrm{T}} = \pmatrix{\beta_1 & \beta_2 & \beta_3}$$
+</div>
+<div class="fragment">
+$$ \mathbf{x_i} = \pmatrix{x_{i, 1} \\ x_{i, 2} \\ x_{i, 3}}$$
+</div>
+<div class="fragment">
+$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = \pmatrix{\beta_1 x_{i, 1} & \beta_2 x_{i, 2} & \beta_3 x_{i, 3}}$$
+</div>
+
+---
+
+### More than one predictor
+
+```{r, multi-pred-demo, echo = TRUE, eval = FALSE}
+model.matrix( ~ predictor1 + predictor2 + predictor3)
+```
+```{r, multi-pred-real, echo = FALSE, eval = TRUE}
+a <- model.matrix( ~ ., data = x_corr[, 1:3])[c(1, 500, 1000, 2000, 3000), ]
+rownames(a) <- NULL
+colnames(a)[2:4] <- paste0("predictor", seq_len(3))
+a
+```
+
+----
+
+### More than one predictor
+
+>- the scale of the variables matters
+>- good to standardise continuous predictors
+
+<div type="fragment">
+```{r, echo = TRUE, eval = FALSE}
+# standardise continuous predictors
+predictors_std <- scale(predictors)
+```
+</div>
+
+----
+
+### Continuous and discrete predictors
+
+>- can include continuous and discrete predictors in one model
+
+<div class="fragment">
+```{r, mixed-preds, echo = TRUE, eval = FALSE}
+mod <- lm(response ~ continuous1 + continuous2 + discrete)
+```
+```{r, mixed-preds-real, echo = FALSE, eval = TRUE}
+a <- model.matrix( ~ ., data = data.frame(x_corr[, 1:2], mountain_range))[c(1, 500, 1000, 2000, 3000), ]
+rownames(a) <- NULL
+colnames(a)[2:3] <- paste0("continuous", seq_len(2))
+colnames(a)[4:6] <- paste0("discrete", seq_len(3))
+a
+```
+</div>
+
+----
+
+### Multiple predictors: new assumptions
+
+>- all the same assumptions as before
+>- plus: predictors are assumed to be independent(ish)
+>        + technical term: *multicollinearity*
+>- if two predictors are highly correlated the model can't tell them apart
+>- how to address issues:
+>        + careful predictor choice
+>        + remove correlated predictors
+
+----
+
+### Multicollinearity in R
+
+```{r, multiple-predictors, echo = FALSE, eval = TRUE}
+predictor_variables <- predictors[, c(7, 8, 14:15)]
+colnames(predictor_variables) <- paste0("predictor", seq_len(4))
+```
+```{r, multiple-predictors-corr, echo = TRUE, eval = TRUE}
+round(cor(predictor_variables), 2)
+```
+
+>- solution: remove variables until none are highly correlated
+>        + removing `predictor4` is a good option here
+
+----
+
+### Multiple predictors: interactions
+
+```{r, plot-example-multi-abline, echo = FALSE, eval = TRUE}
+plot(precipitation ~ elevation, pch = 16, las = 1, bty = "l", cex = 0.9,
+     col = alpha(col_palette[25], 0.8),
+     xlab = "Elevation (m)", ylab = "Precipitation (mm)")
+mod <- lm(precipitation ~ elevation * mountain_range)
+for (i in seq_len(3))
+  abline(coef(mod)[1] - i * 150, coef(mod)[2] + i * 0.07, col = col_palette[floor(i * 75)], lwd = 3)
+```
+
+----
+
+### Multiple predictors: interactions
+
+```{r, plot-example-multi-code, echo = TRUE, eval = TRUE}
+mod <- lm(precipitation ~ elevation * mountain_range)
+summary(mod)
+```
+
+----
+
+### Multiple predictors: interactions
+
+>- difficult to interpret coefficients
+>        + effect of one depends on value of the other
+>        + particularly hard if both are continuous
+>- it is possible to include higher-order interactions
+>        + even more difficult to interpret
+
+----
