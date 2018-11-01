@@ -1,0 +1,79 @@
+---
+title: "Linear models workshop: Part 2"
+author: "Jian Yen"
+date: "2 November 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Building a mixed model
+
+In this worksheet, we'll again use the data set `predictor_variables.csv`. Load this data set into your R workspace. We're focusing on mixed effects models now, so you'll also need to load the `lme4` package at some point. As before, feel free to use your own data set if you'd prefer.
+
+This time, we're going to focus on the biomass of shrubs ("shrub_biomass"). Our goal is to see if variation in shrub biomass can be explained by any of the predictor variables. The catch is that shrub biomass is known to be influenced by differences in species identities. Changes in species identities are common among canyons and mountain ranges in the Great Basin due to geographical boundaries. Similarly, shrub biomass has changed through time in this region due to changes in climate but also due to changes in management practices. Your task is to decide on a mixed-model structure that is well-suited to this situation.
+
+It might be helpful to keep the following questions in mind:
+
+- which predictors do I want to include?
+- which predictors are "fixed" and which are "random"?
+- do I want random intercepts? Random slopes?
+- what will my model formula look like in R?
+- do my data meet the model assumptions?
+       + what *are* the model assumptions? (much the same as a general linear model)
+       + do I need to remove any predictors?
+       + do I need to standardise any predictors?
+- is my fitted model any good? Are there better options?
+- what information should I present from the fitted model?
+
+A useful resource when answering some of these questions is Ben Bolker's [GLMM FAQ](http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html).
+
+As with general linear models, choosing a model structure often comes down to choosing a model that makes sense biologically or ecologically.
+
+As a reminder, here are some of the ways to define a mixed effects model:
+```{r model-structures}
+# load lme4 package
+library(lme4)
+
+# fit model with single intercept and slope
+mod_lm <- lm(response ~ predictor)
+
+# fit model with random intercepts
+mod_int <- lmer(response ~ predictor + (1 | block))
+
+# fit model with random intercepts and slopes
+mod_slope <- lmer(response ~ predictor + (1 + predictor | block))
+
+# fit model with nested random intercepts
+mod_slope <- lmer(response ~ predictor + (1 + predictor | block / nested_block))
+```
+
+These models work in much the same way as general linear models, and can support multiple predictors. The only catch is that the random effects must be factors (or at least have fewer levels than observations).
+
+Once you've fitted your model, the following summary functions can be helpful.
+```{r summarise-model}
+# generate a residual plot
+plot(mod)
+
+# extract model summary
+summary(mod)
+
+# extract fixed effects
+fixef(mod)
+
+# extract random effects
+#    Is this a reasonable thing to do?
+ranef(mod)
+```
+
+#### Questions
+- Which variables did you include as fixed effects and which as random effects? Why?
+- Are you happy with this model structure? Why or why not?
+- What is your main conclusion from this model?
+
+### Task: model selection
+Choosing one "best" model was hard enough with general linear models. It gets harder with mixed models. Have a look at the information provided [here](http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#model-selection-and-averaging) and see if you can come up with a few ways to assess model "goodness of fit" or to distinguish among competing models. The common methods of model selection listed in Worksheet 1 are equally useful with mixed models, but often aren't quite as straightforward.
+
+Your task: use your fitted model or models to define a single "best" model of shrub biomass. Justify your process. Don't forget that the definition of "best" will usually depend on a model's intended purpose.

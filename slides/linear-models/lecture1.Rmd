@@ -1,5 +1,5 @@
 ---
-title: "E&E stats workshop: general linear models"
+title: "General linear models"
 date: "2 November 2018"
 ---
 

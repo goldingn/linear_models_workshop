@@ -1,0 +1,351 @@
+---
+title: "Mixed effects models"
+date: "2 November 2018"
+---
+
+```{r setup, echo = FALSE, eval = TRUE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center")
+
+# set working directory
+setwd("~/Dropbox/research/linear_models_workshop/")
+
+# load R packages
+library(viridisLite)
+library(ggplot2)
+library(lme4)
+
+# we want all the simulated bits to be the same each time
+set.seed(2018-11-02)
+
+# set colour palette
+col_palette <- inferno(256)
+col_pal <- alpha(col_palette, 0.7)
+
+# load data
+response <- read.csv("data/bird_community.csv", stringsAsFactors = FALSE)[, -1]
+predictors <- read.csv("data/predictor_variables.csv", row.names = 1, stringsAsFactors = FALSE)
+
+# continuous response data: precipitation, min_temp, max_temp
+precipitation <- predictors$precipitation
+
+# continuous predictors: elevation_m
+elevation <- predictors$elevation_m
+
+# discrete predictors: canyon or mountain range
+mountain_range <- predictors$mountain_range
+
+# create sub-matrix of correlated predictors
+x_corr <- predictors[, c(7, 14:16)]
+
+# simulate some data
+n <- 100
+n_sp <- 5
+```
+
+----
+
+### An example
+```{r echo = FALSE, results = "asis"}
+  set.seed(1542)
+  x <- rnorm(n * n_sp)
+  alpha <- abs(rnorm(n_sp, mean = 50, sd = 3)) + 50
+  beta <- rnorm(n_sp, mean = 0, sd = 2)
+  epsilon <- rnorm(length(x), sd = 3)
+  y <- rep(alpha, each = n) + rep(beta, each = n) * x + epsilon
+  size <- y
+  temp <- x
+  plot(y ~ x,
+       pch = 16,
+       cex = 1.5,
+       cex.lab = 1.5,
+       xaxt = "n",
+       yaxt = "n",
+       bty = "l",
+       xlab = "Predictor variable", ylab = "Response variable",
+       col = col_pal[200])
+  axis(1,
+       at = seq(min(x), max(x), length = 10),
+       labels = round(seq(12, 25, length = 10)),
+       cex = 1.5)
+  axis(2, cex = 1.5, las = 1)
+```
+
+----
+
+### Single regression line
+```{r echo = FALSE, results = "asis"}
+  plot(y ~ x,
+       pch = 16,
+       cex = 1.5,
+       cex.lab = 1.5,
+       xaxt = "n",
+       yaxt = "n",
+       bty = "l",
+       xlab = "Predictor variable", ylab = "Response variable",
+       col = col_pal[200])
+  axis(1,
+       at = seq(min(x), max(x), length = 10),
+       labels = round(seq(12, 25, length = 10)),
+       cex = 1.5)
+  axis(2, cex = 1.5, las = 1)
+  abline(lm(y ~ x), lwd = 3, col = col_pal[200])
+```
+
+----
+
+### Known sources of variation
+```{r echo = FALSE, results = "asis"}
+  col_set <- round(seq(20, 200, length = n_sp))
+  plot(y ~ x,
+       pch = 16,
+       cex = 1.5,
+       xaxt = "n",
+       yaxt = "n",
+       cex.lab = 1.5,
+       bty = "l",
+       xlab = "Predictor variable", ylab = "Response variable",
+       col = col_pal[rep(col_set, each = n)])
+  axis(1,
+       at = seq(min(x), max(x), length = 10),
+       labels = round(seq(12, 25, length = 10)),
+       cex = 1.5)
+  axis(2, cex = 1.5, las = 1)
+  abline(lm(y ~ x), lwd = 3, col = col_pal[200])
+```
+
+----
+
+### Variation in intercepts
+```{r echo = FALSE, results = "asis"}
+  col_set <- round(seq(20, 200, length = n_sp))
+  plot(y ~ x,
+       pch = 16,
+       cex = 1.5,
+       xaxt = "n",
+       yaxt = "n",
+       cex.lab = 1.5,
+       bty = "l",
+       xlab = "Predictor variable", ylab = "Response variable",
+       col = col_pal[rep(col_set, each = n)])
+  axis(1,
+       at = seq(min(x), max(x), length = 10),
+       labels = round(seq(12, 25, length = 10)),
+       cex = 1.5)
+  axis(2, cex = 1.5, las = 1)
+  species <- rep(seq_len(n_sp), each = n)
+  mod <- lme4::lmer(y ~ x + (1 | species))
+  for (i in seq_len(n_sp)) {
+    abline(a = (fixef(mod)[1] + ranef(mod)[[1]][i, ]),
+           b = fixef(mod)[2],
+           lwd = 3,
+           col = col_pal[col_set[i]])
+  }
+```
+
+----
+
+### Variation in intercepts and slopes
+```{r echo = FALSE, results = "asis"}
+  col_set <- round(seq(20, 200, length = n_sp))
+  plot(y ~ x,
+       pch = 16,
+       cex = 1.5,
+       xaxt = "n",
+       yaxt = "n",
+       cex.lab = 1.5,
+       bty = "l",
+       xlab = "Predictor variable", ylab = "Response variable",
+       col = col_pal[rep(col_set, each = n)])
+  axis(1,
+       at = seq(min(x), max(x), length = 10),
+       labels = round(seq(12, 25, length = 10)),
+       cex = 1.5)
+  axis(2, cex = 1.5, las = 1)
+  mod <- lme4::lmer(y ~ x + (1 + x | species))
+  for (i in seq_len(n_sp)) {
+    abline(a = (fixef(mod)[1] + ranef(mod)[[1]][i, 1]),
+           b = (fixef(mod)[2] + ranef(mod)[[1]][i, 2]),
+           lwd = 3,
+           col = col_pal[col_set[i]])
+  }
+```
+
+----
+
+### Variation in parameters
+
+>- in some cases, variation is directly of interest
+>- in other cases, it's a nuisance
+>        + can break indepedence assumptions
+>        + can introduce extra noise
+>- mixed models can help
+
+----
+
+### Mixed models
+
+>- mix of *fixed* and *random* effects
+>- these terms are not consistently defined
+>- in this context, really only matters for factors (categorical variables)
+
+----
+
+### Fixed effects
+
+>- these are what we've used in general linear models
+>        + intercepts
+>        + slopes
+>        + interactions
+>- my definition: categories are independent
+
+----
+
+### Random effects
+
+>- parameters differ among categories
+>- some definitions:
+>        + random if we haven't sampled the entire population
+>        + random if we "don't care" about the factor
+>        + random if there is some form of shrinkage
+>- my definition: random if categories are linked or if they break independence assumptions
+
+----
+
+### Random effects
+
+>- examples: repeated measures, spatial blocks
+>- can be a really good way to account for non-independent observations
+>- caveat: `lme4` methods often require >5 levels for random effects models to work
+>- be pragmatic (and check model fit!)
+
+----
+
+### Mixed models
+
+>- assumptions: much the same as a general linear model
+>- independent observations (conditional on random effects)
+>- normally distributed residuals
+>- constant variance of residuals
+
+----
+
+### Mixed models in R
+
+>- use a formula interface to define models
+
+<div class="fragment"
+```{r, eval = FALSE}
+response ~ fixed_effects + (fixed_effects | random_effects)
+
+# commonly
+response ~ fixed_effects + (1 | random_effects)
+
+# less commonly
+response ~ fixed_effects + (1 | random_effect1 / random_effect2)
+# (1 | re1 / re2) expands to (1 | re1) + (1 | re1:re2)
+```
+</div>
+
+----
+
+### Mixed models in R
+
+```{r, eval = FALSE}
+# load lme4 package
+library(lme4)
+
+# fit model with single intercept and slope
+mod_lm <- lm(response ~ predictor)
+
+# fit model with random intercepts
+mod_int <- lmer(response ~ predictor + (1 | block))
+
+# fit model with random intercepts and slopes
+mod_slope <- lmer(response ~ predictor + (1 + predictor | block))
+
+# fit model with nested random intercepts
+mod_slope <- lmer(response ~ predictor + (1 + predictor | block / nested_block))
+```
+
+----
+
+### Mixed models in R
+
+```{r, echo = FALSE, eval = TRUE}
+z <- factor(rep(seq_len(n_sp), each = n))
+mod_int <- lmer(y ~ x + (1 | z))
+```
+
+```{r}
+# check residuals
+plot(mod_int)
+```
+
+----
+
+### Mixed models in R
+
+```{r, echo = FALSE, eval = TRUE}
+z <- factor(rep(seq_len(n_sp), each = n))
+mod_int <- lmer(y ~ x + (1 | z))
+```
+
+```{r}
+# summarise a fitted model
+summary(mod_int)
+```
+
+----
+
+### Mixed models in R
+
+```{r, echo = FALSE, eval = TRUE}
+z <- factor(rep(seq_len(n_sp), each = n))
+mod_int <- lmer(y ~ x + (1 | z))
+```
+
+```{r}
+# print the fixed effects
+fixef(mod_int)
+
+# print the random effects
+ranef(mod_int)
+```
+
+----
+
+### Mixed models in R
+
+```{r, echo = FALSE, eval = TRUE}
+mod_slope <- lmer(y ~ x + (1 + x | z))
+```
+
+```{r}
+# print the fixed effects
+fixef(mod_slope)
+
+# print the random effects
+ranef(mod_slope)
+```
+
+----
+
+### Interpreting random effects
+
+>- in short: don't!
+>- if you care about it, it might be better as a fixed effect
+>- however, can still look at "variance components"
+>        + technical term: variance partitioning
+> `VarCorr(mod)` is useful for this (but so is `)
+
+----
+
+### Model assessment and model selection
+
+>- many different approaches (see Worksheet 1)
+>- start by assessing model fit
+>- but also need to assess model fit *for purpose*
+>- which model is "best"?
+>- my approach: often decide on random effects *a priori* and don't "select" these
+
+----
