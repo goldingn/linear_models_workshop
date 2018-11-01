@@ -437,7 +437,7 @@ $$ \mathbf{\beta}^{\mathrm{T}} = \pmatrix{\beta_1 & \beta_2 & \beta_3}$$
 $$ \mathbf{x_i} = \pmatrix{0 \\ 1 \\ 0}$$
 </div>
 <div class="fragment">
-$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = \pmatrix{0 & \beta_2 & 0}$$
+$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = 0 + \beta_2 + 0$$
 </div>
 
 ---
@@ -470,7 +470,7 @@ $$ \mathbf{\beta}^{\mathrm{T}} = \pmatrix{\beta_1 & \beta_2 & \beta_3}$$
 $$ \mathbf{x_i} = \pmatrix{x_{i, 1} \\ x_{i, 2} \\ x_{i, 3}}$$
 </div>
 <div class="fragment">
-$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = \pmatrix{\beta_1 x_{i, 1} & \beta_2 x_{i, 2} & \beta_3 x_{i, 3}}$$
+$$ \mathbf{\beta}^{\mathrm{T}} \mathbf{x_i} = \beta_1 x_{i, 1} + \beta_2 x_{i, 2} + \beta_3 x_{i, 3}$$
 </div>
 
 ---
