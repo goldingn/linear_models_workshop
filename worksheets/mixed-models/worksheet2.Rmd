@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 
 In this worksheet, we'll again use the data set `predictor_variables.csv`. Load this data set into your R workspace. We're focusing on mixed effects models now, so you'll also need to load the `lme4` package at some point. As before, feel free to use your own data set if you'd prefer.
 
-This time, we're going to focus on the biomass of shrubs ("shrub_biomass"). Our goal is to see if variation in shrub biomass can be explained by any of the predictor variables. The catch is that shrub biomass is known to be influenced by differences in species identities. Changes in species identities are common among canyons and mountain ranges in the Great Basin due to geographical boundaries. Similarly, shrub biomass has changed through time in this region due to changes in climate but also due to changes in management practices. Your task is to decide on a mixed-model structure that is well-suited to this situation.
+This time, we're going to focus on the biomass of shrubs ("shrub_biomass"). Our goal is to see if variation in shrub biomass can be explained by any of the predictor variables. The catch is that shrub biomass is known to be influenced by differences in species identities. Changes in species identities are common among canyons and mountain ranges in the Great Basin due to geographical boundaries. Similarly, shrub biomass has changed through time in this region due to changes in climate but also due to changes in management practices. Your task is to decide on a mixed-model structure that is well-suited to this situation, and to fit this model in R.
 
 It might be helpful to keep the following questions in mind:
 
@@ -66,6 +66,9 @@ fixef(mod)
 # extract random effects
 #    Is this a reasonable thing to do?
 ranef(mod)
+
+# look at variance terms
+VarCorr(mod)
 ```
 
 #### Questions

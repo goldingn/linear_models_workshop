@@ -176,7 +176,7 @@ n_sp <- 5
 
 >- in some cases, variation is directly of interest
 >- in other cases, it's a nuisance
->        + can break indepedence assumptions
+>        + can break independence assumptions
 >        + can introduce extra noise
 >- mixed models can help
 
@@ -202,19 +202,18 @@ n_sp <- 5
 
 ### Random effects
 
->- parameters differ among categories
+>- parameters differ among categories but categories aren't fully independent
 >- some definitions:
 >        + random if we haven't sampled the entire population
 >        + random if we "don't care" about the factor
 >        + random if there is some form of shrinkage
->- my definition: random if categories are linked or if they break independence assumptions
 
 ----
 
 ### Random effects
 
 >- examples: repeated measures, spatial blocks
->- can be a really good way to account for non-independent observations
+>        + can be a really good way to account for non-independent observations
 >- caveat: `lme4` methods often require >5 levels for random effects models to work
 >- be pragmatic (and check model fit!)
 
@@ -223,7 +222,7 @@ n_sp <- 5
 ### Mixed models
 
 >- assumptions: much the same as a general linear model
->- independent observations (conditional on random effects)
+>- residuals are independent
 >- normally distributed residuals
 >- constant variance of residuals
 
@@ -269,28 +268,24 @@ mod_slope <- lmer(response ~ predictor + (1 + predictor | block / nested_block))
 
 ----
 
-### Mixed models in R
+### plot function
 
 ```{r, echo = FALSE, eval = TRUE}
 z <- factor(rep(seq_len(n_sp), each = n))
 mod_int <- lmer(y ~ x + (1 | z))
-```
 
-```{r}
 # check residuals
 plot(mod_int)
 ```
 
 ----
 
-### Mixed models in R
+### summary function
 
 ```{r, echo = FALSE, eval = TRUE}
 z <- factor(rep(seq_len(n_sp), each = n))
 mod_int <- lmer(y ~ x + (1 | z))
-```
 
-```{r}
 # summarise a fitted model
 summary(mod_int)
 ```
@@ -336,7 +331,7 @@ ranef(mod_slope)
 >- if you care about it, it might be better as a fixed effect
 >- however, can still look at "variance components"
 >        + technical term: variance partitioning
-> `VarCorr(mod)` is useful for this (but so is `)
+>- `VarCorr(mod)` is useful for this (but so is `summary(mod)`)
 
 ----
 
