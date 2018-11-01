@@ -10,13 +10,13 @@ Below you will find the planned schedule for the day, instructions on installing
 
 ##### 09.00-10.45 **Linear models**
  - Introduction to linear regression and linear models
- - Working on exercises in R
+ - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/linear-models/worksheet1.Rmd) ]
 
 ##### 10.45-11.00 **Break**
 
 ##### 11.00-12.30 **Mixed models**
  - Introduction to random effects and mixed models
- - Working on exercises using `lme4`
+ - Working on exercises using `lme4` [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/worksheets/mixed-models/worksheet2.Rmd) ]
 
 ##### 12.30-13.30 **Lunch**
 
