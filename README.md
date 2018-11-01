@@ -6,6 +6,8 @@ This GitHub site provides materials for the one-day workshop on Linear Mdoels as
 
 Below you will find the planned schedule for the day, instructions on installing required software, and links to data and worksheets.
 
+Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/niaieenm5nacycq/AAAIyX9fQH7bnnXvTvkwkGdta?dl=0) ]
+
 ### Schedule
 
 ##### 09.00-10.45 **Linear models**
