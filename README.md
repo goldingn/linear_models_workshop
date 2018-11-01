@@ -17,7 +17,7 @@ Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/n
 ##### 10.45-11.00 **Break**
 
 ##### 11.00-12.30 **Mixed models**
- - Introduction to random effects and mixed models
+ - Introduction to random effects and mixed models [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/slides/mixed-models/lecture2.pdf) ]
  - Working on exercises using `lme4` [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/worksheets/mixed-models/worksheet2.Rmd) ]
 
 ##### 12.30-13.30 **Lunch**
