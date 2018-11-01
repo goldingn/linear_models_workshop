@@ -1,0 +1,20 @@
+.reveal section img{
+  background: none;  
+  border: none;
+}
+.reveal p {
+  text-align: left;
+  margin-top: 1em;
+}
+.reveal ul {
+  display: block;
+  padding-bottom: 15px;
+}
+.reveal li {
+  padding-top: 15px;
+  padding-bottom: 20px;
+}
+.reveal ol {
+  display: block;
+  padding-bottom: 15px;
+}  
