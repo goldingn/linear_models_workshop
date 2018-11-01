@@ -22,7 +22,7 @@ Below you will find the planned schedule for the day, instructions on installing
 
 ##### 13.30-15.00 **Generalised linear models**
  - Introduction to generalised linear models
- - Working on exercises in R
+ - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/glms/worksheet3.Rmd) ]
 
 ##### 15.00-15.15 **Break**
 
