@@ -1,11 +1,7 @@
 ---
 title: "generalised linear models"
-output: xaringan::moon_reader
+date: "2 November 2018"
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 ## linear models
 
@@ -19,7 +15,6 @@ where $\epsilon$ represents noise, or measurement error, and is assumed to be no
 $$
 \epsilon_i \sim N(0, \sigma^2)
 $$
----
 
 ## linear models
 
@@ -31,7 +26,6 @@ $$
 $$
 \epsilon_i \sim N(0, \sigma^2)
 $$
---
 
 like this:
 $$
@@ -43,7 +37,6 @@ $$
 $$
 where $\mu_i$ is the value of $y_i$ we would expect to see if there wasn't any noise
 
----
 
 ## linear models
 
@@ -56,26 +49,19 @@ But our data often aren't!
  - Counts can't be negative or non-integer
  - presence/absence data can only take two values
 
----
 
 ## Transformations
 
-We could transform (AKA torture) these data to make them look normal-ish.
-
- - add 1 to counts then take the log?
-
-But:
+We could transform (AKA torture) these data to make them look normal-ish. But:
  
  - torture is unpleasant
  - it will give you an answer, but it probably won't be the right answer
  - it's less powerful than modern methods
  - it might get your paper rejected
  
----
+## 
 
 ![](glm_img1.png)
-
----
 
 ## generalised linear model
 
@@ -86,17 +72,23 @@ We can use other distributions for $y$ instead. E.g.:
   - e.g. $3, 0, 2$
  - requires *positive* parameter: $\lambda_i$
 
+## generalised linear model
+
+We can use other distributions for $y$ instead. E.g.:
+
 #### *Binomial*
  - if $y_i$ are non-negative integers with known maximum ( $N$ )
    - e.g. $5, 4, 5$ where $N = 5$
  - requires  *probability* parameter: $p_i$
 
+## generalised linear model
+
+We can use other distributions for $y$ instead. E.g.:
+
 #### *Bernoulli*
  - if $y_i$ are binary
   - e.g. $0, 0, 1$
  - requires  *probability* parameter: $p_i$
-
----
 
 ## generalised linear model
 
@@ -150,16 +142,14 @@ The *general* trick:
  - define a link function (e.g. the exponent)
  - use the linear bit from a linear model
 
+## generalised linear model
+
 see `?family` in R for some options
 
 > `binomial(link = "logit")`
-
 > `gaussian(link = "identity")`
-
 > `Gamma(link = "inverse")`
-
 > `inverse.gaussian(link = "1/mu^2")`
-
 > `poisson(link = "log")`
 
 ---
@@ -185,19 +175,17 @@ But these models aren't linear, so:
 
 ## use likelihoods
 
-We can compute the likelihood of a model - the probability of observing the *data*, given the model parameters.
+We can compute the likelihood of a model - probability of observing the *data*, given the parameters.
 
-```{r echo = TRUE}
-x <- c(-1.38, 4.07, 0.84)
-y <- c(4, 0, 1)
-
+```{r}
+x <- c(-1.38, 4.07, 0.84); y <- c(4, 0, 1)
 likelihood <- function (intercept, slope) {
   mu <- intercept + slope * x
   lambda <- exp(mu)
   prod(dpois(y, lambda))
 }
 ```
-```{r echo = TRUE}
+```{r}
 likelihood(0, -0.5)
 likelihood(0, -1)
 ```
@@ -208,15 +196,13 @@ likelihood(0, -1)
 
 We fit the models by trying different values of the parameters, and find the parameters that give the biggest likelihood.
 
-```{r, echo = TRUE}
+```{r}
 objective <- function(params) {
   -1 * likelihood(params[1], params[2])
 }
-o <- optim(c(intercept = 0, slope = 0), objective)
-o$par
+optim(c(intercept = 0, slope = 0), objective)$par
 
-m <- glm(y ~ x, family = poisson)
-coef(m)
+coef(glm(y ~ x, family = poisson))
 ```
 
 ---
@@ -226,9 +212,7 @@ coef(m)
 We can compare models using likelihoods too:
 
  - **likelihood ratio** tells us how much better one model is than another at explaining the data, whilst accounting for overfitting
- 
  - **information criteria** rank how good models are at explaining the data whilst accounting for overfitting.
- 
  - **cross-validation** tells us how good models are at predicting what new data will look like
 
 ---
@@ -236,12 +220,10 @@ We can compare models using likelihoods too:
 ## rules of likelihood comparison
 
 We can only compare different sets of parameters, so:
-
 - we cannot compare models fitted to different datasets
 - we cannot compare models with different distributions
 
 but:
-
  - we can compare models with different covariates, because that's the same as setting their coefficients to $0$
  - models that are the same, but with some coefficients set to 0 are called *nested*
  
@@ -250,13 +232,13 @@ but:
 ## likelihood ratios
 
 We can compare our glm with an intercept-only glm (which assumes no effect of x)
-```{r echo = TRUE}
+```{r}
 full_model_lik <- likelihood(0.4053, -0.7307)
 ```
-```{r echo = TRUE}
+```{r}
 intercept_only_lik <- likelihood(0.5108, 0)
 ```
-```{r echo = TRUE}
+```{r}
 full_model_lik / intercept_only_lik
 ```
 the data are 18 times more likely under the model with the covariate
@@ -269,21 +251,22 @@ If we add more parameters (letting the slope vary) we would expect to do better 
 
 ![](glm_img2.png)
 
-How can we tell if our improvement is real?
-
 ---
 
 ## likelihood ratio test
 
 Statistical theory tells us that if the covariates had no effect, ( $-2$ times) the difference in the log-likelihoods follows a Chi-squared distribution, with degrees of freedom given by the number of extra parameters
 
-```{r echo = TRUE}
+```{r}
 log_diff <- (log(intercept_only_lik) - log(full_model_lik))
 -2 * log_diff
 ```
 
+---
 
-```{r echo = TRUE}
+## likelihood ratio test
+
+```{r}
 m_full <- glm(y ~ x, family = poisson)
 m_int <- glm(y ~ 1, family = poisson)
 anova(m_int, m_full)
@@ -294,10 +277,10 @@ anova(m_int, m_full)
 ## likelihood ratio test
 
 We can compute the chance of seeing at least this big a difference under this chi-squared distribution:
-```{r echo = TRUE}
+```{r}
 1 - pchisq(-2 * log_diff, 1)
 ```
-```{r echo = TRUE}
+```{r}
 lmtest::lrtest(m_int, m_full)
 ```
 
@@ -313,7 +296,11 @@ $$
 
 where $k$ is the number of parameters. This trades off goodness of fit ( $-2 \times ln(\hat{L})$) against model complexity ( $2 \times k$ ). Smaller values of AIC (high likelihood & low complexity) imply a 'better' models, but they are only relative measures, they don't tell you how good your model is.
 
-```{r echo = TRUE}
+---
+
+## information criteria
+
+```{r}
 AIC(m_full)
 AIC(m_int)
 ```
@@ -325,7 +312,11 @@ again, the full model seems better, even though it has more parameters
 
 Both likelihood ratios and information criteria are *approximations* of how much the model is overfitting to the data, based on some *assumptions*.
 
-A more robust alternative is to calculate the likelihood against some data that weren't used to fit the model:
+A more robust alternative is to calculate the likelihood against some data that weren't used to fit the model
+
+---
+
+## external validation
 
  1. train a model on dataset 1 and get the parameter estimates, e.g. $\hat{a}$ and $\hat{b}$
  2. make predictions of the *expected* value of the response for each datapoint in dataset 2 using the model equation, e.g.:
@@ -337,7 +328,12 @@ $$
 $$
  3. compute the likelihood for each datapoint in dataset 2 given the expected values from the model fitted to dataset 1.
 
-But if you don't have an obvious second set of data to do this external validation, you can chop your data up into smaller datasets...
+
+---
+
+## cross-validation
+
+If you don't have an obvious second set of data to do this external validation, you can chop your data up into smaller datasets...
 
 
 ---
@@ -348,6 +344,10 @@ But if you don't have an obvious second set of data to do this external validati
  2. re-fit the model $K$ different times, each omitting one of the folds and combining the remaining $K-1$ folds into a single training dataset
  3. for each model, calculate the likelihood for each witheld datapoint given the *expected* value of $y_i$ from the model that excluded it.
  
+---
+
+## K-fold cross-validation
+
 ![](https://upload.wikimedia.org/wikipedia/commons/1/1c/K-fold_cross_validation_EN.jpg)
 
 [image from Wikipedia]
@@ -355,7 +355,6 @@ But if you don't have an obvious second set of data to do this external validati
 ---
 
 ## K-fold cross-validation
-But...
 
 This takes longer than the alternative approaches (you need to re-fit the model lots of times)
 
@@ -368,15 +367,19 @@ You might also need to think hard about how you split your data into folds. Mayb
 
 ## leave-one-out cross validation
 
-AKA LOOCV. This is the same as K-fold cross-validation, but where $K = n$, so each datapoint is its own fold.
+(AKA LOOCV) The same as K-fold cross-validation, but where $K = n$, so each datapoint is its own fold.
 
-```{r echo = TRUE}
+---
+
+## leave-one-out cross validation
+
+```{r}
 df <- data.frame(y = y, x = x)
 cost <- function (y, yhat) {
   -2 * dpois(y, yhat, log = TRUE)
 }
 ```
-```{r echo = TRUE}
+```{r}
 boot::cv.glm(df, m_full, cost = cost)$delta[1]
 boot::cv.glm(df, m_int, cost = cost)$delta[1]
 ```

@@ -1,0 +1,159 @@
+---
+title: "Linear models workshop: Part 3"
+author: "Nick Golding"
+date: "2 November 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Building a model for count data
+
+This time, we're going to fit models to see how the abundance of a bird species depends on different predictors. We'll need to load the `predictor_variables.csv` dataset from before, and the `bird_community.csv` dataset, which contains count data for a number of bird species - the number of individuals of that species observed at each location and year.
+
+You can pick any bird species you like, and you then need to answer the following questions about that species:
+
+ - which environmental variables are important in determining the abundance of that species?
+ - is the expected abundance changing over time?
+ - if there is a change over time, is it explained by the environmental variables?
+
+As with the linear models you used earlier, think through these questions:
+
+- do I want to use all the predictors?
+- are my predictors continuous or discrete?
+- which type of model is most appropriate?
+- do my data meet the model assumptions?
+       + do I need to transform my data?
+       + do I need to remove any predictors?
+       + do I need to standardise any predictors?
+- is my fitted model any good? Are there better options?
+- what information should I present from the fitted model?
+
+When deciding on a  model structure, it can help to keep your question in mind: which model makes the most sense given the biological or ecological context?
+
+As a reminder, here are some of the model structures we've covered:
+
+```{r model-structures}
+# logistic regression
+mod_logistic <- glm(binary_response ~ predictor,
+                    family = binomial("logit"),
+                    data = data_set)
+
+# logistic regression with multiple trials
+mod_logistic <- glm(cbind(n_successes, n_failures) ~ predictor,
+                    family = binomial("logit"),
+                    data = data_set)
+
+# poisson regression
+mod_counts <- glm(count_response ~ predictor,
+                  family = poisson("log"),
+                  data = data_set)
+
+# glm regression with a categorical predictor
+mod_logistic <- glm(binary_response ~ predictor + factor(categorical_predictor),
+                    family = binomial("logit"),
+                    data = data_set)
+
+# shorthand: include every variable in a data set
+#   (this will ignore the response varaible if it's in data_set)
+mod_logistic_full <- glm(binary_response ~ .,
+                         family = binomial("logit"),
+                         data = data_set)
+
+# you can add interactions between all pairs of variables in the same way
+#   (but do you really want to do this?)
+mod_logistic_full_int <- glm(binary_response ~ . * .,
+                             family = binomial("logit"),
+                             data = data_set)
+```
+
+You can compare models in a bunch of different ways:
+```{r}
+# compare the (-2 * log) likelihood ratio of the models
+anova(model1, model2)
+
+# compare the AICs
+AIC(model1)
+AIC(model2)
+
+# LOO-CV (fiddly and takes time, you don't *need* to do this!)
+# install.packages("boot")
+library(boot)
+# change this for your distribution type!
+cost <- function (y, yhat) {
+  -2 * sum(dpois(y, yhat, log = TRUE))
+}
+cv.glm(dataset, model1, cost = cost)$delta[1]
+cv.glm(dataset, model2, cost = cost)$delta[1]
+
+```
+
+Once you've fitted your model, the following summary functions can be helpful.
+```{r summarise-model}
+# generate diagnostic plots
+#    (makes four plots; use par(mfrow = c(2, 2)) to put these on one page)
+plot(mod)
+
+# if you just want one plot, you can use `which` to set the particular plot
+#    (type ?plot.lm for details on the different plot options)
+plot(mod, which = 1)
+
+# extract model coefficients and fit statistics
+summary(mod)
+```
+
+**Note:** the diagnostic plots for glms can look really bad, even if the model is perfect! For this exercise, don't worry too much about those plots. There is a better way of assessing these models, and there are details at the bottom of this worksheet, but you don't need to go through in this session.
+
+#### Questions
+- Are you happy with this model? Why or why not?
+- What is your main conclusion from this model?
+
+### Task
+Prepare a written description of this model (*methods*) and a written summary of the model outputs (*results*) (3-5 sentences). Think about the following: What information do you need to provide to make this model reproducible? Do your data meet the assumptions of your model? Does the model fit the data well? What information do you need to provide on each parameter? Which figures and/or tables would you use to support these sentences? (you don't have to create these figures or tables unless you really want to).
+
+
+### Extra info: more reliable residuals
+
+The standard diagnostic plots for glms can make your model look very funky for some data types - typically binary data or integer values less than ~30. This can happen even if the model you fitted was the same as that used to generate the data.
+
+Here's an example:
+```{r}
+# simulate a predictor
+x <- runif(1000, -2, 2)
+# get the expected count with some made up parameters
+mu <- -1 + 1 * x
+lambda <- exp(mu)
+# simulate count data
+y <- rpois(1000, lambda)
+
+# fit the model, exactly the same as how we generate the data
+m <- glm(y ~ x, family = poisson)
+
+# the parameters are pretty much exactly the same as the true parameters
+coef(m)
+
+# do the default diagnostic plots
+plot(m)
+```
+
+😱 GAAaaaaRRGH!
+
+The problem is that residuals; calculated based on the difference between the expected and observed values, don't work well when the observed values are integers, particularly if they are small integers.
+
+A solution is to compute and plot *randomised quantile residuals*, which basically account for the the sampling distribution in a more useful way. The DHARMa package does this for us, and this blog post provides more details about what is going on: https://theoreticalecology.wordpress.com/2016/08/28/dharma-an-r-package-for-residual-diagnostics-of-glmms/
+
+```{r}
+# install and load DHARMa
+# install.packages("DHARMa")
+library(DHARMa)
+
+# compute our new residuals
+resid <- simulateResiduals(m)
+
+# plot them
+plot(resid)
+```
+
+😌 much better!

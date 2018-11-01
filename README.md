@@ -6,23 +6,25 @@ This GitHub site provides materials for the one-day workshop on Linear Mdoels as
 
 Below you will find the planned schedule for the day, instructions on installing required software, and links to data and worksheets.
 
+Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/niaieenm5nacycq/AAAIyX9fQH7bnnXvTvkwkGdta?dl=0) ]
+
 ### Schedule
 
 ##### 09.00-10.45 **Linear models**
- - Introduction to linear regression and linear models
- - Working on exercises in R
+ - Introduction to linear regression and linear models [ [download](https://github.com/goldingn/linear_models_workshop/raw/master/slides/linear-models/lecture1.pdf) ]
+ - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/linear-models/worksheet1.Rmd) ]
 
 ##### 10.45-11.00 **Break**
 
 ##### 11.00-12.30 **Mixed models**
  - Introduction to random effects and mixed models
- - Working on exercises using `lme4`
+ - Working on exercises using `lme4` [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/worksheets/mixed-models/worksheet2.Rmd) ]
 
 ##### 12.30-13.30 **Lunch**
 
 ##### 13.30-15.00 **Generalised linear models**
  - Introduction to generalised linear models
- - Working on exercises in R
+ - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/glms/worksheet3.Rmd) ]
 
 ##### 15.00-15.15 **Break**
 

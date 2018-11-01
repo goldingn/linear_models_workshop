@@ -1,0 +1,226 @@
+---
+title: "Bayesian Inference"
+date: "2 November 2018"
+---
+
+## likelihood
+
+Compute the probability of observing this dataset given a proposed set of parameters.
+
+```{r}
+y <- c(4, 0, 1)
+likelihood <- function (lambda) {
+  probs <- dpois(y, lambda)
+  prod(probs)
+}
+```
+```{r}
+likelihood(1)
+likelihood(0.5)
+```
+
+## maximum likelihood
+
+Keep trying new parameters until you find the most likely set
+
+```{r warning = FALSE}
+objective <- function(lambda) {
+  -1 * likelihood(lambda)
+}
+optim(c(lambda = 0), objective)$par
+```
+
+## likelihood surface
+
+Compute the likelihood at a range of possible values
+```{r}
+lambda <- seq(0, 10, length.out = 100)
+likelihood <- sapply(lambda, likelihood)
+```
+```{r echo = FALSE, fig.height = 4}
+plot(likelihood ~ lambda, type = "l")
+abline(v = 1.666667, lty = 2)
+```
+
+## likelihood-based inference
+
+Considers the probability distribution over *data*, given parameters, but then treats this surface *kind-of* like a probability distribution over parameters
+
+## likelihood-based inference
+
+ - **estimates & standard errors**
+ - confidence intervals
+ - p-values
+
+these assume the likelihood surface is normally distributed (it isn't)
+
+## likelihood-based inference
+
+```{r echo = FALSE, fig.height = 4}
+plot(likelihood ~ lambda, type = "l")
+abline(v = 1.666667, lty = 2)
+# whack a normal distribution on it
+sry <- summary(glm(y ~ 1, family = poisson("identity")))
+coef <- sry$coefficients[1:2]
+normal_approx <- function (lambda) {
+  dnorm(lambda, coef[1], coef[2])
+}
+norm <- sapply(lambdas, normal_approx)
+norm <- max(likelihoods) * norm / max(norm) 
+lines(norm ~ lambdas, col = "blue", lwd = 3)
+```
+
+## likelihood-based inference
+
+ - estimates & standard errors
+ - **confidence intervals**
+ - p-values
+
+"Were this procedure to be repeated on numerous samples, the fraction of calculated confidence intervals (which would differ for each sample) that encompass the true population parameter would tend toward 90%."
+
+## likelihood-based inference
+
+ - estimates & standard errors
+ - confidence intervals
+ - **p-values**
+
+---
+
+ - "the probability that the observed effects were produced by random chance alone"
+ - "the probability under the null hypothesis of obtaining a result equal to or more extreme than what was actually observed"
+ - "the probability that the null hypothesis is true, or the probability that the alternative hypothesis is false"
+
+## Bayes theorem
+
+Considers the probability distribution over ~~data~~ **parameters**, given ~~parameters~~ **data**
+
+$$
+p(\text{parameters} | \text{data}) = \frac{p(\text{data} | \text{parameters}) \times p(\text{parameters})}{p(\text{data})}
+$$
+
+## Bayes theorem
+
+Considers the probability distribution over ~~data~~ **parameters**, given ~~parameters~~ **data**
+
+$$
+p(\text{parameters} | \text{data}) = \frac{p(\text{data} | \text{parameters}) \times p(\text{parameters})}{☹}
+$$
+
+---
+
+![](bayes1.jpeg)
+
+---
+
+![](bayes2.png)
+
+## likelihood vs prior
+
+[click me!](http://rpsychologist.com/d3/bayes)
+
+## prior elicitation
+
+**go to the whiteboard!**
+
+## calculating the posterior
+
+$$
+p(\text{parameters} | \text{data}) = \frac{p(\text{data} | \text{parameters}) \times p(\text{parameters})}{☹}
+$$
+
+Because of the $☹$ 
+it's bit tricky estimate the parameters of the posterior
+
+Instead, we can draw random samples from the posterior. With enough samples, we can estimate the parameters
+
+---
+
+![](https://i.redd.it/o5u40l7mr9vy.jpg)
+
+```{r, echo = FALSE}
+x <- c()
+```
+
+## posterior samples
+
+```{r, echo = FALSE}
+x <- c(x, rpois(10, 15))
+hist(x,
+     col = "grey", border = "white",
+     main = "",
+     xlab = "posterior of a",
+     xlim = c(0, 30))
+```
+
+
+## posterior samples
+
+```{r, echo = FALSE}
+x <- c(x, rpois(100, 15))
+hist(x,
+     col = "grey", border = "white",
+     main = "",
+     xlab = "posterior of a",
+     xlim = c(0, 30))
+```
+
+## posterior samples
+
+```{r, echo = FALSE}
+x <- c(x, rpois(1000, 15))
+hist(x,
+     col = "grey", border = "white",
+     main = "",
+     xlab = "posterior of a",
+     xlim = c(0, 30))
+```
+
+## posterior samples
+
+```{r, echo = FALSE}
+x <- c(x, rpois(10000, 15))
+hist(x,
+     col = "grey", border = "white",
+     main = "",
+     xlab = "posterior of a",
+     xlim = c(0, 30))
+```
+
+## MCMC
+
+Unfortunately, we don't have a random number generator for every model.
+
+*Markov chain* Monte Carlo gives us a time series of correlated random numbers from our distribution
+
+[click me!](https://chi-feng.github.io/mcmc-demo/app.html#RandomWalkMH,standard)
+
+## MCMC software
+
+![](bayes3.png)
+
+
+
+## model averaging
+
+One approach to dealing with multiple candidate models is to average them, based on how good they are
+
+Bayesian inference does this automatically!
+
+We get lots of different models, weighted according to how probable they are
+
+## when to do Bayes?
+
+- when we have prior information to use
+- when we don't have much data
+- when our model is too complicated for maximum likelihood
+- when we really care about uncertainty
+
+## when not to do Bayes?
+
+- when we have vague priors,
+- when we plenty of data
+- when there's a maximum likelihood method that works
+- when we don't care about uncertainty that much
+
+
+
