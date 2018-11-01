@@ -11,7 +11,7 @@ Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/n
 ### Schedule
 
 ##### 09.00-10.45 **Linear models**
- - Introduction to linear regression and linear models [ [download](https://github.com/goldingn/linear_models_workshop/raw/master/slides/linear-models/lecture1.pdf) ]
+ - Introduction to linear regression and linear models [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/slides/linear-models/lecture1.pdf) ]
  - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/linear-models/worksheet1.Rmd) ]
 
 ##### 10.45-11.00 **Break**
