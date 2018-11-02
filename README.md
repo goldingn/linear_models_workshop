@@ -23,13 +23,13 @@ Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/n
 ##### 12.30-13.30 **Lunch**
 
 ##### 13.30-15.00 **Generalised linear models**
- - Introduction to generalised linear models
+ - Introduction to generalised linear models [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/slides/glms/glms.pdf) ]
  - Working on exercises in R [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/glms/worksheet3.Rmd) ]
 
 ##### 15.00-15.15 **Break**
 
 ##### 15.15-16.15 **Bayesian inference**
- - Introduction to Bayesian inference (MCMC, priors, challenges)
+ - Introduction to Bayesian inference (MCMC, priors, challenges) [ [download](https://github.com/goldingn/linear_models_workshop/blob/master/slides/bayes/bayes.pdf) ] 
  - Working on exercises using `rstanarm` [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/bayes/worksheet4.Rmd) ]
 
 ##### 16.15-17.00 **Problem solving in groups** (assessed)
