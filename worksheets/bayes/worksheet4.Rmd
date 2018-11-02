@@ -1,0 +1,78 @@
+---
+title: "Linear models workshop: Part 4"
+author: "Nick Golding"
+date: "2 November 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Building a Bayesian model
+
+The aim of this session is to take one of the models you developed in one of the other worksheets - it can be a linear model, linear mixed model, or generalised linear model - and refit it in a Bayesian way. In this case, that means doing MCMC and selecting prior distributions for the model parameters.
+
+You task is:
+
+  - think really hard about what a plausible range of values might be for the intercept and the slopes of the coariates in your model. This should be based on what you know about the biology/ecology/physics of the question, not the data you're fitting to
+  
+  - fit a model specifying the priors for those parameters. It'll be easiest if you use a normal distribution!
+  
+  - compare the model estimates to the non-Bayesian version you fitted earlier. Did being Bayesian affect the estimates in this case?
+  
+## rstanarm
+
+There are several pieces of software for fitting Bayesian models. If you want to fit a linear-ish Bayesian model (ie. a  Bayesian version fo the models we've been thinking about today), one of the easiest  to use is `rstanarm`. The following `rstanarm` functions will let you fit Bayesian versions of these models, with a very similar interface:
+
+```{r rstanarm-functions}
+library(rstanarm)
+
+# lm (we don't use stan_lm() as the prior definition interface is wacky)
+mod_lm <- stan_glm(continuous_response ~ predictor,
+                   data = data_set)
+
+# lmer
+mod_lm <- stan_lmer(continuous_response ~ predictor + (1 | random_effect),
+                    data = data_set)
+
+# glm
+mod_glm <- stan_glm(response ~ predictor,
+                    family = family("link"),
+                    data = data_set)
+```
+
+You can specify priors like this:
+```{r priors}
+mod <- stan_glm(continuous_response ~ predictor,
+                prior = normal(0, 10),
+                prior_intercept = normal(0, 3),
+                data = data_set)
+```
+
+You can also use some familiar model comparison approaches
+```{r comparison}
+# information criterion
+waic(mod)
+
+# LOO-CV
+loo(mod)
+
+# k-fold cross-validation
+kfold(mod)
+```
+
+You can also do a an ANOVA, using the `stan_aov()` function.
+
+One of the best ways of assessing how well a Bayesian model fits the data is to simulate some made-up versions of the response data according to all of the posterior samples of the model. Then we can compare what the model thinks is going on (the simulations) with the actual response data. We can compare these graphically with density plots (like a smoothed histogram), that show the distribution of the response data, either true or simulated.
+
+You can do the random simulations with the `posterior_predict()` function. The `bayesplot` package has a nnice function to plot the comparison with the real data.
+
+```{r}
+y_rep <- rstanarm::posterior_predict(mod)
+
+# install.packages("bayesplot")
+library(bayesplot)
+ppc_dens_overlay(data_set$continuous_response, y_rep)
+```
+
