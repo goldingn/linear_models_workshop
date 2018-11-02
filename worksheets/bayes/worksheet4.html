@@ -208,7 +208,7 @@ mod_lm &lt;- stan_glm(continuous_response ~ predictor,
                    data = data_set)
 
 # lmer
-mod_lm &lt;- stan_lmer(continuous_response ~ predictor + (1 | random_effect),
+mod_lm &lt;- stan_glmer(continuous_response ~ predictor + (1 | random_effect),
                     data = data_set)
 
 # glm
