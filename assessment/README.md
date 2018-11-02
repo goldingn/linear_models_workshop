@@ -6,7 +6,7 @@ This data set contains rent data from 2000-2018 in two regions of Melbourne: Sou
 
 The data set has several columns:
 
-- discrict: where in Melbourne is this?
+- discrict: where in Melbourne was this observation?
 - area: local area (broadly, suburb)
 - mon: month of observation 
 - yr: year of observation
