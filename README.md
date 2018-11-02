@@ -30,7 +30,7 @@ Here's a link to the data you'll be using: [ [link](https://www.dropbox.com/sh/n
 
 ##### 15.15-16.15 **Bayesian inference**
  - Introduction to Bayesian inference (MCMC, priors, challenges)
- - Working on exercises using `rstanarm`
+ - Working on exercises using `rstanarm` [ [download](https://raw.githubusercontent.com/goldingn/linear_models_workshop/master/worksheets/bayes/worksheet4.Rmd) ]
 
 ##### 16.15-17.00 **Problem solving in groups** (assessed)
  - Working in small groups (3-4 people) to solve some open-ended problems using linear models. This will be assessed (whether the group has gained knowledge in using linear models) for E&E PhD program accreditation.
